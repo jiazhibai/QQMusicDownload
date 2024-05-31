@@ -1,11 +1,42 @@
 import os
 
 import requests
+import re
 
 download_proxies = {
     'http': '',
     'https': '',
 }
+
+# replace_host = ""
+# replace_host = "dl.stream.qqmusic.qq.com"
+# replace_host = "121.51.49.41"
+replace_host = "aqqmusic.tc.qq.com"
+
+
+def replace_host_qqmusic(url):
+    if replace_host == "":
+        return url
+    else:
+        print('Host changed to:', url)
+        return replace_host_in_url(url, replace_host)
+
+
+def replace_host_in_url(url, new_host):
+    """
+    Replace the host part of the given URL with the new host.
+
+    Args:
+    url (str): The original URL.
+    new_host (str): The new host to replace the original host.
+
+    Returns:
+    str: The URL with the host replaced.
+    """
+    # Use regex to replace the host part of the URL
+    pattern = r'^(http://|https://)([^/]+)'
+    new_url = re.sub(pattern, r'\1' + new_host, url)
+    return new_url
 
 
 def extract_filename(url):
@@ -23,7 +54,8 @@ def download_file(songs_info, download_dir):
         return True
 
     filename = songs_info['strMediaMid']
-    r = requests.get(songs_info['download_link'], proxies=download_proxies)
+    url = replace_host_qqmusic(songs_info['download_link'])
+    r = requests.get(url, proxies=download_proxies)
     song_path = os.path.join(download_dir, filename)
     with open(song_path, 'wb') as f:
         f.write(r.content)
